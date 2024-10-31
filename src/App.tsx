@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
-import noiseModuleURL from "./audio/noise-module.ts?url";
+import noiseModuleURL from "./audio/noise-module.ts?worker&url";
 import { createOrbitalControl } from "./audio/orbit-module";
 import { parallel, series } from "./audio/util";
-import vectorComputeModuleURL from "./audio/vector-compute-module.ts?url";
-import pinkTromboneModuleURL from "./pink-trombone/module.ts?url";
+import vectorComputeModuleURL from "./audio/vector-compute-module.ts?worker&url";
+import pinkTromboneModuleURL from "./pink-trombone/module.ts?worker&url";
 import { Constriction, PinkTromboneNode, preset } from "./pink-trombone/node";
 import { TractPoint } from "./pink-trombone/shared";
 
