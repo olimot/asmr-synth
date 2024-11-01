@@ -30,6 +30,7 @@ body {
     0 26px 48px 0px rgba(0, 0, 0, 0.5);
   box-sizing: border-box;
   width: 640px;
+  max-width: calc(100% - 20px);
 }
 
 .switch-button {
@@ -111,7 +112,6 @@ input[type="range"] {
   appearance: none;
   background: transparent;
   cursor: pointer;
-  width: 25rem;
 }
 
 /* Removes default focus */
