@@ -13,7 +13,7 @@ html {
 }
 
 body {
-  background: linear-gradient(0deg, #3f51b5, #9c27b0);
+  background: linear-gradient(0deg, #3e6076, #eec0b9);
 }
 
 .app {
@@ -34,7 +34,7 @@ body {
 }
 
 .switch-button {
-  width: 140px;
+  width: 80px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -45,14 +45,15 @@ body {
   font-size: 16px;
   font-weight: bold;
   text-transform: uppercase;
+  line-height: 1.2;
 }
 
 button {
   position: relative;
   box-sizing: border-box;
   border-radius: 50%;
-  width: 120px;
-  height: 120px;
+  width: 64px;
+  height: 64px;
   border: 0;
   margin: 0;
   padding: 12px;
@@ -68,10 +69,10 @@ button::before {
   content: "";
   display: block;
   position: absolute;
-  top: 12px;
-  left: 12px;
-  right: 12px;
-  bottom: 12px;
+  top: 6px;
+  left: 6px;
+  right: 6px;
+  bottom: 6px;
   font-size: 0;
   color: transparent;
   border-radius: 50%;
@@ -81,7 +82,7 @@ button::before {
     -2px 1px 3px 2px inset rgba(255, 255, 255, 0.6),
     3px -4px 3px 0px inset rgba(255, 255, 255, 0.2),
     1px -4px 2px 1px inset rgba(0, 0, 0, 0.4),
-    -6px 33px 27px 10px rgba(0, 0, 0, 0.3);
+    -4px 16px 14px 5px rgba(0, 0, 0, 0.3);
 }
 
 button:active::before {
@@ -121,11 +122,7 @@ input[type="range"]:focus {
 
 /* slider track */
 input[type="range"]::-webkit-slider-runnable-track {
-  background: linear-gradient(
-    0deg,
-    #666666,
-    #333333
-  );
+  background: linear-gradient(0deg, #666666, #333333);
   border-radius: 12px;
   height: 12px;
 }
@@ -136,11 +133,7 @@ input[type="range"]::-webkit-slider-thumb {
   appearance: none;
   margin-top: -10px; /* Centers thumb on the track */
   background-color: hsl(60 5% 90% / 1);
-  background: linear-gradient(
-    45deg,
-    hsl(60 5% 96% / 1),
-    hsl(60 5% 75% / 1)
-  );
+  background: linear-gradient(45deg, hsl(60 5% 96% / 1), hsl(60 5% 75% / 1));
   box-shadow:
     -2px 1px 2px 2px inset rgba(255, 255, 255, 0.6),
     1px -4px 2px 1px inset rgba(255, 255, 255, 0.6),

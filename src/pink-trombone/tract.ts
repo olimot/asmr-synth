@@ -123,7 +123,7 @@ export default class Tract {
       prevL[trans.index] += amplitude;
     }
 
-    const turbulence = noiseModulator * this.turbulenceNoise() * 0.66;
+    const turbulence = noiseModulator * this.turbulenceNoise() * 0.25;
 
     // compute reflection at junction of tract and nose
     const Rn = prevR[this.noseStart - 1];
@@ -163,8 +163,8 @@ export default class Tract {
         ref = lerp(this.reflection[i + 1], this.newReflection[i + 1], lambda);
         L[i] = ref * (prevR[i] + prevL[i + 1]) + prevL[i + 1];
       }
-      R[i] = min(max(-1, R[i] * 0.999), 1);
-      L[i] = min(max(-1, L[i] * 0.999), 1);
+      R[i] = min(max(-1, R[i] * 0.9999), 1);
+      L[i] = min(max(-1, L[i] * 0.9999), 1);
 
       // compute air pressure in nose
       if (i < this.noseLength) {
@@ -182,8 +182,8 @@ export default class Tract {
           const reflectionAmount = prevNoseR[i] + prevNoseL[i + 1];
           noseL[i] = reflection * reflectionAmount + prevNoseL[i + 1];
         }
-        noseR[i] = min(max(-1, noseR[i] * 0.999), 1);
-        noseL[i] = min(max(-1, noseL[i] * 0.999), 1);
+        noseR[i] = min(max(-1, noseR[i] * 0.9999), 1);
+        noseL[i] = min(max(-1, noseL[i] * 0.9999), 1);
       }
     }
 

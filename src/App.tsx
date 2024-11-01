@@ -97,7 +97,17 @@ export async function buildAudioGraph() {
     context.audioWorklet.addModule(pinkTromboneModuleURL),
   ]);
 
-  const pinkTrombone = new PinkTromboneNode(context, { tractLengthCm: 16.9 });
+  const pinkTrombone = new PinkTromboneNode(context, {
+    tractLengthCm: 16.9,
+    isActive: false,
+    peakStart: true,
+    autoWobble: false,
+    voiceness: 0,
+    frequency: 140,
+    velumDiameter: 0.01,
+    vibratoAmount: 0.009,
+    vibratoFrequency: 6,
+  });
   const lipConstriction = pinkTrombone.createConstriction();
   const tongueConstriction = pinkTrombone.createConstriction();
 
@@ -126,75 +136,90 @@ export async function buildAudioGraph() {
 export default function App() {
   const [graph, setGraph] = useState<AudioGraph | null>(null);
   const [isPlaying, setPlaying] = useState(false);
-  const [isWhisper, setWhisper] = useState(true);
-
+  const [settings, setSettings] = useState({
+    isWhisper: true,
+    speed: 0.1,
+    range: 100,
+  });
   useEffect(() => {
-    if (graph) {
-      const {
-        master,
-        orbitControl,
-        pinkTrombone,
-        lipConstriction,
-        tongueConstriction,
-        context,
-      } = graph;
-      master.gain.cancelScheduledValues(0);
-      if (isPlaying) {
-        master.gain.setValueAtTime(1, context.currentTime);
+    if (!graph) return;
+    const {
+      master,
+      orbitControl,
+      pinkTrombone,
+      lipConstriction,
+      tongueConstriction,
+      context,
+    } = graph;
+    if (isPlaying) {
+      master.gain.setValueAtTime(1, context.currentTime);
+    } else {
+      master.gain.linearRampToValueAtTime(0, context.currentTime + 0.1);
+    }
+
+    const updateTrombone = () => {
+      lipConstriction.set(getNarrowest(pressedTimeMap, lipKeyMap));
+      tongueConstriction.set(getNarrowest(pressedTimeMap, constrictionKeyMap));
+      pinkTrombone.setTongue(getNarrowest(pressedTimeMap, tongueKeyMap));
+
+      const isNasal = ["KeyQ", "KeyA", "KeyZ"].some((code) =>
+        pressedTimeMap.has(code),
+      );
+      pinkTrombone.set({
+        velumDiameter: isNasal ? 0.4 : 0.01,
+        voiceness: settings.isWhisper ? 0 : 0.4,
+        isActive: true,
+      });
+    };
+
+    const pressedTimeMap = new Map<string, number>();
+    const keys = Object.keys({
+      ...tongueKeyMap,
+      ...constrictionKeyMap,
+      ...lipKeyMap,
+    });
+    const tongueKeys = Object.keys(tongueKeyMap);
+
+    let interval = (0.05 + settings.speed) / 2;
+    let timer = setTimeout(function queueRandomMove() {
+      const t = context.currentTime;
+      if (Math.random() < 0.5) {
+        interval += 0.025 * (2 * Math.random() - 1);
+        interval = Math.min(Math.max(0.05, interval), settings.speed);
+      }
+      const end = interval + Math.random() * 0.05;
+      orbitControl.angle.linearRampToValueAtTime(
+        orbitControl.angle.value + Math.PI * (2 * Math.random() - 1) * 0.16,
+        t + end,
+      );
+      orbitControl.radius.linearRampToValueAtTime(
+        Math.max(0, Math.random() * settings.range - 50),
+        t + end,
+      );
+
+      const sel = keys[(Math.random() * keys.length) | 0];
+      const isTongueChanged = tongueKeys.includes(sel);
+      pressedTimeMap.set(sel, Date.now());
+      if (isTongueChanged) {
+        for (const tongueKey of tongueKeys) {
+          if (tongueKey === sel) continue;
+          pressedTimeMap.delete(tongueKey);
+        }
+        updateTrombone();
       } else {
-        master.gain.linearRampToValueAtTime(0, context.currentTime + 0.1);
+        updateTrombone();
+        const d = constrictionKeyMap[sel]?.diameter ?? lipKeyMap[sel].diameter;
+        const ms = d ? 33 : end * 1000;
+        setTimeout(() => {
+          pressedTimeMap.delete(sel);
+          updateTrombone();
+        }, ms);
       }
 
-      const pressedTimeMap = new Map<string, number>();
-
-      const pressRandomKey = (keyMap: Record<string, unknown>, end: number) => {
-        const keys = Object.keys(keyMap);
-        const sel = keys[(Math.random() * keys.length) | 0];
-        pressedTimeMap.set(sel, Date.now());
-        setTimeout(() => pressedTimeMap.delete(sel), end * 1000);
-      };
-
-      let interval = 0.0475;
-      let timer = setTimeout(function queueRandomMove() {
-        const t = context.currentTime;
-        if (Math.random() < 0.5) {
-          interval += 0.025 * (2 * Math.random() - 1);
-          interval = Math.min(Math.max(0.05, interval), 0.1);
-        }
-        const end = interval + Math.random() * 0.05;
-        orbitControl.angle.linearRampToValueAtTime(
-          orbitControl.angle.value + Math.PI * (2 * Math.random() - 1) * 0.16,
-          t + end,
-        );
-        orbitControl.radius.linearRampToValueAtTime(
-          Math.random() * 100,
-          t + end,
-        );
-        pressRandomKey(
-          { ...tongueKeyMap, ...constrictionKeyMap, ...lipKeyMap },
-          end,
-        );
-
-        lipConstriction.set(getNarrowest(pressedTimeMap, lipKeyMap));
-        tongueConstriction.set(
-          getNarrowest(pressedTimeMap, constrictionKeyMap),
-        );
-        pinkTrombone.setTongue(getNarrowest(pressedTimeMap, tongueKeyMap));
-
-        const isNasal = ["KeyQ", "KeyA", "KeyZ"].some((code) =>
-          pressedTimeMap.has(code),
-        );
-        pinkTrombone.set({
-          velumDiameter: isNasal ? 0.4 : 0.01,
-          voiceness: isWhisper ? 0 : 0.4,
-          isActive: true,
-        });
-
-        timer = setTimeout(queueRandomMove, end * 1000);
-      });
-      return () => clearTimeout(timer);
-    }
-  }, [isPlaying, isWhisper, graph]);
+      timer = setTimeout(queueRandomMove, end * 1000);
+    });
+    return () => clearTimeout(timer);
+  }, [isPlaying, settings, graph]);
 
   return (
     <>
@@ -209,30 +234,53 @@ export default function App() {
               if (!isPlaying && !graph) setGraph(await buildAudioGraph());
               setPlaying(!isPlaying);
             }}
-          >
-            <span />
-          </button>
+          />
         </div>
         <div className="switch-button">
           <div className="label">Whisper</div>
-          <div className={isWhisper ? "indicator on" : "indicator"} />
-          <button type="button" onClick={() => setWhisper(!isWhisper)}>
-            <span />
-          </button>
+          <div className={settings.isWhisper ? "indicator on" : "indicator"} />
+          <button
+            type="button"
+            onClick={() => {
+              setSettings({ ...settings, isWhisper: !settings.isWhisper });
+            }}
+          />
         </div>
       </div>
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: "auto 1fr",
+          gridTemplateColumns: "auto 1fr 20px",
           gap: 32,
           marginTop: 32,
         }}
       >
         <div className="label">Speed</div>
-        <input type="range" />
-        <div className="label">Volume</div>
-        <input type="range" />
+        <input
+          type="range"
+          min={0.05}
+          max={0.5}
+          value={settings.speed}
+          step={0.01}
+          onChange={(e) => {
+            console.log(Number(e.target.value));
+            setSettings({ ...settings, speed: Number(e.target.value) });
+          }}
+        />
+        <div>{settings.speed}</div>
+        <div className="label">Range</div>
+        <input
+          type="range"
+          min={50}
+          max={200}
+          value={settings.range}
+          step={1}
+          onChange={(e) => {
+            console.log(Number(e.target.value));
+            setSettings({ ...settings, range: Number(e.target.value) });
+          }}
+        />{" "}
+        <div>{settings.range}</div>
       </div>
     </>
   );

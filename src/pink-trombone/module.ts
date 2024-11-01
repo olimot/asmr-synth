@@ -65,6 +65,17 @@ export default class PinkTromboneProcessor extends AudioWorkletProcessor {
       sampleRate,
       sampleRate * 2,
       tractLengthCm,
+      {
+        isActive: false,
+        peakStart: true,
+        autoWobble: true,
+        voiceness: 0,
+        frequency: 140,
+        velumDiameter: 0.01,
+        vibratoAmount: 0.005,
+        vibratoFrequency: 6,
+        ...options?.processorOptions,
+      },
     );
     createServer(this.port, {
       getDiameter: () => this.pinkTrombone.diameter,

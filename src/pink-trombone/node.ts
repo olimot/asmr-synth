@@ -52,7 +52,10 @@ export class Constriction {
 export class PinkTromboneNode extends AudioWorkletNode {
   request = createClient(this.port);
 
-  constructor(context: BaseAudioContext, options?: { tractLengthCm?: number }) {
+  constructor(
+    context: BaseAudioContext,
+    options?: PinkTromboneProps & { tractLengthCm?: number },
+  ) {
     super(context, "pink-trombone", { processorOptions: options });
   }
 

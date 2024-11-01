@@ -73,6 +73,8 @@ export type PinkTromboneProps = {
   voiceness: number;
   frequency: number;
   velumDiameter: number;
+  vibratoAmount: number;
+  vibratoFrequency: number;
 };
 
 export type Scheduled<T> = T & { time: number; flag?: "cancel" | "flush" };

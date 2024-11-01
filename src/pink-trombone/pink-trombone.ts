@@ -10,13 +10,19 @@ export default class PinkTrombone implements PinkTromboneProps {
   readonly s2p: number;
   readonly p2s: number;
 
-  constructor(sampleRate: number, processRate: number, tractLengthCm: number) {
+  constructor(
+    sampleRate: number,
+    processRate: number,
+    tractLengthCm: number,
+    props: PinkTromboneProps,
+  ) {
     this.glottis = new Glottis(processRate);
     this.tract = new Tract(processRate, tractLengthCm);
     this.sampleRate = sampleRate;
     this.processRate = processRate;
     this.s2p = processRate / sampleRate;
     this.p2s = 1 / this.s2p;
+    Object.assign(this, props);
   }
 
   process(input: Float32Array | undefined, output: Float32Array) {
@@ -86,5 +92,19 @@ export default class PinkTrombone implements PinkTromboneProps {
   }
   set voiceness(value: number) {
     this.glottis.voiceness = value;
+  }
+
+  get vibratoAmount(): number {
+    return this.glottis.vibratoAmount;
+  }
+  set vibratoAmount(value: number) {
+    this.glottis.vibratoAmount = value;
+  }
+
+  get vibratoFrequency(): number {
+    return this.glottis.vibratoFrequency;
+  }
+  set vibratoFrequency(value: number) {
+    this.glottis.vibratoFrequency = value;
   }
 }
