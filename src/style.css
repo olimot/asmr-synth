@@ -91,15 +91,15 @@ button:active::before {
     -2px 1px 3px 2px inset rgba(255, 255, 255, 0.6),
     3px -4px 3px 0px inset rgba(255, 255, 255, 0.2),
     1px -2px 2px 1px inset rgba(0, 0, 0, 0.4),
-    -6px 33px 27px 10px rgba(0, 0, 0, 0.3);
+    -4px 12px 14px 5px rgba(0, 0, 0, 0.3);
 }
 
 .indicator {
   display: inline-block;
   width: 24px;
-  height: 10px;
+  height: 8px;
   font-size: 0;
-  background-color: #aaa;
+  background-color: #444;
 }
 
 .indicator.on {
@@ -107,7 +107,6 @@ button:active::before {
   box-shadow: 0px 0px 12px 2px rgba(0, 255, 255, 0.5);
 }
 
-/*********** Baseline, reset styles ***********/
 input[type="range"] {
   -webkit-appearance: none;
   appearance: none;
@@ -115,23 +114,20 @@ input[type="range"] {
   cursor: pointer;
 }
 
-/* Removes default focus */
 input[type="range"]:focus {
   outline: none;
 }
 
-/* slider track */
 input[type="range"]::-webkit-slider-runnable-track {
   background: linear-gradient(0deg, #666666, #333333);
   border-radius: 12px;
   height: 12px;
 }
 
-/* slider thumb */
 input[type="range"]::-webkit-slider-thumb {
-  -webkit-appearance: none; /* Override default look */
+  -webkit-appearance: none;
   appearance: none;
-  margin-top: -10px; /* Centers thumb on the track */
+  margin-top: -10px;
   background-color: hsl(60 5% 90% / 1);
   background: linear-gradient(45deg, hsl(60 5% 96% / 1), hsl(60 5% 75% / 1));
   box-shadow:
@@ -146,28 +142,10 @@ input[type="range"]::-webkit-slider-thumb {
 }
 
 input[type="range"]:focus::-webkit-slider-thumb {
-  outline: 3px solid #808080;
-  outline-offset: 0.125rem;
-}
-
-/*********** Firefox styles ***********/
-/* slider track */
-input[type="range"]::-moz-range-track {
-  background-color: #333333;
-  border-radius: 0.5rem;
-  height: 0.5rem;
-}
-
-/* slider thumb */
-input[type="range"]::-moz-range-thumb {
-  background-color: #808080;
-  border: none; /*Removes extra border that FF applies*/
-  border-radius: 0.5rem;
-  height: 1rem;
-  width: 1rem;
-}
-
-input[type="range"]:focus::-moz-range-thumb {
-  outline: 3px solid #808080;
-  outline-offset: 0.125rem;
+  box-shadow:
+    0px 0px 6px 1px rgba(0, 255, 96, 0.5),
+    -2px 1px 2px 2px inset rgba(255, 255, 255, 0.6),
+    1px -4px 2px 1px inset rgba(255, 255, 255, 0.6),
+    0.5px -2px 2px 1px inset rgba(0, 0, 0, 1),
+    -3px 6px 16px 0px rgba(0, 0, 0, 0.3);
 }
