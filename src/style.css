@@ -38,8 +38,12 @@ body {
   flex-direction: column;
   align-items: center;
   gap: 12px;
+}
+
+.label {
   font-size: 16px;
   font-weight: bold;
+  text-transform: uppercase;
 }
 
 button {
@@ -99,4 +103,78 @@ button:active::before {
 .indicator.on {
   background-color: #00ff00;
   box-shadow: 0px 0px 12px 2px rgba(0, 255, 255, 0.5);
+}
+
+/*********** Baseline, reset styles ***********/
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+  cursor: pointer;
+  width: 25rem;
+}
+
+/* Removes default focus */
+input[type="range"]:focus {
+  outline: none;
+}
+
+/* slider track */
+input[type="range"]::-webkit-slider-runnable-track {
+  background: linear-gradient(
+    0deg,
+    #666666,
+    #333333
+  );
+  border-radius: 12px;
+  height: 12px;
+}
+
+/* slider thumb */
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none; /* Override default look */
+  appearance: none;
+  margin-top: -10px; /* Centers thumb on the track */
+  background-color: hsl(60 5% 90% / 1);
+  background: linear-gradient(
+    45deg,
+    hsl(60 5% 96% / 1),
+    hsl(60 5% 75% / 1)
+  );
+  box-shadow:
+    -2px 1px 2px 2px inset rgba(255, 255, 255, 0.6),
+    1px -4px 2px 1px inset rgba(255, 255, 255, 0.6),
+    0.5px -2px 2px 1px inset rgba(0, 0, 0, 1),
+    -3px 6px 16px 0px rgba(0, 0, 0, 0.3);
+
+  border-radius: 8px;
+  width: 48px;
+  height: 32px;
+}
+
+input[type="range"]:focus::-webkit-slider-thumb {
+  outline: 3px solid #808080;
+  outline-offset: 0.125rem;
+}
+
+/*********** Firefox styles ***********/
+/* slider track */
+input[type="range"]::-moz-range-track {
+  background-color: #333333;
+  border-radius: 0.5rem;
+  height: 0.5rem;
+}
+
+/* slider thumb */
+input[type="range"]::-moz-range-thumb {
+  background-color: #808080;
+  border: none; /*Removes extra border that FF applies*/
+  border-radius: 0.5rem;
+  height: 1rem;
+  width: 1rem;
+}
+
+input[type="range"]:focus::-moz-range-thumb {
+  outline: 3px solid #808080;
+  outline-offset: 0.125rem;
 }

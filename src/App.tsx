@@ -88,47 +88,47 @@ const getNarrowest = (
   return point;
 };
 
+export async function buildAudioGraph() {
+  const context = new AudioContext();
+
+  await Promise.all([
+    context.audioWorklet.addModule(noiseModuleURL),
+    context.audioWorklet.addModule(vectorComputeModuleURL),
+    context.audioWorklet.addModule(pinkTromboneModuleURL),
+  ]);
+
+  const pinkTrombone = new PinkTromboneNode(context, { tractLengthCm: 16.9 });
+  const lipConstriction = pinkTrombone.createConstriction();
+  const tongueConstriction = pinkTrombone.createConstriction();
+
+  const master = new GainNode(context, { gain: 0 });
+
+  const orbitControl = createOrbitalControl(context);
+
+  series(
+    pinkTrombone,
+    new GainNode(context, { gain: 4 }),
+    orbitControl,
+    master,
+    context.destination,
+  );
+
+  return {
+    context,
+    orbitControl,
+    pinkTrombone,
+    lipConstriction,
+    tongueConstriction,
+    master,
+  };
+}
+
 export default function App() {
   const [graph, setGraph] = useState<AudioGraph | null>(null);
   const [isPlaying, setPlaying] = useState(false);
   const [isWhisper, setWhisper] = useState(true);
 
   useEffect(() => {
-    if (isPlaying && !graph) {
-      const context = new AudioContext();
-      Promise.all([
-        context.audioWorklet.addModule(noiseModuleURL),
-        context.audioWorklet.addModule(vectorComputeModuleURL),
-        context.audioWorklet.addModule(pinkTromboneModuleURL),
-      ]).then(async () => {
-        const pinkTrombone = new PinkTromboneNode(context, {
-          tractLengthCm: 16.9,
-        });
-        const lipConstriction = pinkTrombone.createConstriction();
-        const tongueConstriction = pinkTrombone.createConstriction();
-
-        const master = new GainNode(context, { gain: 0 });
-        const orbitControl = createOrbitalControl(context);
-        series(
-          pinkTrombone,
-          new GainNode(context, { gain: 4 }),
-          orbitControl,
-          master,
-          context.destination,
-        );
-
-        setGraph({
-          context,
-          orbitControl,
-          pinkTrombone,
-          lipConstriction,
-          tongueConstriction,
-          master,
-        });
-      });
-      return;
-    }
-
     if (graph) {
       const {
         master,
@@ -201,19 +201,38 @@ export default function App() {
       <h1>ASMR Synth</h1>
       <div style={{ display: "flex" }}>
         <div className="switch-button">
-          PLAY
+          <div className="label">Play</div>
           <div className={isPlaying ? "indicator on" : "indicator"} />
-          <button type="button" onClick={() => setPlaying(!isPlaying)}>
+          <button
+            type="button"
+            onClick={async () => {
+              if (!isPlaying && !graph) setGraph(await buildAudioGraph());
+              setPlaying(!isPlaying);
+            }}
+          >
             <span />
           </button>
         </div>
         <div className="switch-button">
-          WHISPER
+          <div className="label">Whisper</div>
           <div className={isWhisper ? "indicator on" : "indicator"} />
           <button type="button" onClick={() => setWhisper(!isWhisper)}>
             <span />
           </button>
         </div>
+      </div>
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "auto 1fr",
+          gap: 32,
+          marginTop: 32,
+        }}
+      >
+        <div className="label">Speed</div>
+        <input type="range" />
+        <div className="label">Volume</div>
+        <input type="range" />
       </div>
     </>
   );
