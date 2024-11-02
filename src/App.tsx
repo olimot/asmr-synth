@@ -165,7 +165,7 @@ export default function App() {
   const [settings, setSettings] = useState({
     voiceness: 0,
     speed: 0.1,
-    range: 100,
+    range: 25,
     frequency: 140,
   });
   useEffect(() => {
@@ -178,9 +178,11 @@ export default function App() {
       master.gain.linearRampToValueAtTime(0, context.currentTime + 0.1);
     }
 
+    orbitControl.angle.cancelScheduledValues(context.currentTime);
+    orbitControl.radius.cancelScheduledValues(context.currentTime);
     pinkTrombone.set({
       time: context.currentTime,
-      flag: 'cancel',
+      flag: "cancel",
       voiceness: settings.voiceness,
       frequency: settings.frequency,
       isActive: true,
@@ -205,15 +207,14 @@ export default function App() {
       const startSchTime = schTime;
       const targetSchTime = startSchTime + 2;
       let angle = orbitControl.angle.value;
+      let radius = orbitControl.radius.value;
       while (schTime <= targetSchTime) {
-        orbitControl.angle.linearRampToValueAtTime(
-          (angle += Math.PI * (2 * Math.random() - 1) * 0.16),
-          schTime,
-        );
-        orbitControl.radius.linearRampToValueAtTime(
-          Math.min(Math.random() * settings.range, 96),
-          schTime,
-        );
+        angle += Math.PI * (2 * Math.random() - 1) * 0.16;
+        orbitControl.angle.linearRampToValueAtTime(angle, schTime);
+
+        radius += (2 * Math.random() - 1) * settings.range;
+        radius = Math.min(Math.max(0, radius), 96);
+        orbitControl.radius.linearRampToValueAtTime(radius, schTime);
 
         if (Math.random() < 0.5) {
           interval += 0.025 * (2 * Math.random() - 1);
@@ -234,7 +235,7 @@ export default function App() {
           updateTrombone(pressedTimeMap, settings, schTime);
           const d =
             constrictionKeyMap[sel]?.diameter ?? lipKeyMap[sel].diameter;
-          const keyUpAfter = d ? 0.06 : duration;
+          const keyUpAfter = d ? 0.12 : duration;
           pressedTimeMap.delete(sel);
           updateTrombone(pressedTimeMap, settings, schTime + keyUpAfter);
         }
@@ -314,8 +315,8 @@ export default function App() {
         <div className="label">Range</div>
         <input
           type="range"
-          min={50}
-          max={200}
+          min={12}
+          max={50}
           value={settings.range}
           step={1}
           onChange={(e) => {
