@@ -15,7 +15,7 @@ function createSchedule(target: object, ...values: Schedules<object>) {
   for (const update of values) {
     const { time = 0, ...updatingFields } = update;
     for (const entry of Object.entries(updatingFields)) {
-      schedules.push({ entry, time: time + currentTime });
+      schedules.push({ entry, time });
     }
   }
   schedules.sort((a, b) => a.time - b.time);

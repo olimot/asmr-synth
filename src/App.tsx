@@ -170,12 +170,21 @@ export default function App() {
   });
   useEffect(() => {
     if (!graph) return;
-    const { master, orbitControl, updateTrombone, context } = graph;
+    const { master, orbitControl, pinkTrombone, updateTrombone, context } =
+      graph;
     if (isPlaying) {
       master.gain.setValueAtTime(1, context.currentTime);
     } else {
       master.gain.linearRampToValueAtTime(0, context.currentTime + 0.1);
     }
+
+    pinkTrombone.set({
+      time: context.currentTime,
+      flag: 'cancel',
+      voiceness: settings.voiceness,
+      frequency: settings.frequency,
+      isActive: true,
+    });
 
     const pressedTimeMap = new Map<string, number>();
     const keys = Object.keys({
@@ -186,27 +195,31 @@ export default function App() {
     const tongueKeys = Object.keys(tongueKeyMap);
 
     let interval = (0.05 + settings.speed) / 2;
+    let schTime = context.currentTime;
     let timer = setTimeout(function queueRandomMove() {
-      const initTime = context.currentTime;
       if (Math.random() < 0.5) {
         interval += 0.025 * (2 * Math.random() - 1);
         interval = Math.min(Math.max(0.05, interval), settings.speed);
       }
-      let schTime = interval;
-      while (schTime <= 2) {
+      schTime += interval + Math.random() * 0.05;
+      const startSchTime = schTime;
+      const targetSchTime = startSchTime + 2;
+      let angle = orbitControl.angle.value;
+      while (schTime <= targetSchTime) {
+        orbitControl.angle.linearRampToValueAtTime(
+          (angle += Math.PI * (2 * Math.random() - 1) * 0.16),
+          schTime,
+        );
+        orbitControl.radius.linearRampToValueAtTime(
+          Math.min(Math.random() * settings.range, 96),
+          schTime,
+        );
+
         if (Math.random() < 0.5) {
           interval += 0.025 * (2 * Math.random() - 1);
           interval = Math.min(Math.max(0.05, interval), settings.speed);
         }
         const duration = interval + Math.random() * 0.05;
-        orbitControl.angle.linearRampToValueAtTime(
-          orbitControl.angle.value + Math.PI * (2 * Math.random() - 1) * 0.16,
-          initTime + schTime,
-        );
-        orbitControl.radius.linearRampToValueAtTime(
-          Math.min(Math.random() * settings.range, 96),
-          initTime + schTime,
-        );
 
         const sel = keys[(Math.random() * keys.length) | 0];
         const isTongueChanged = tongueKeys.includes(sel);
@@ -227,7 +240,9 @@ export default function App() {
         }
         schTime += duration;
       }
-      timer = setTimeout(queueRandomMove, schTime * 1000);
+
+      const ms = (schTime - startSchTime) * 1000;
+      timer = setTimeout(queueRandomMove, ms - 120);
     }, 500);
     return () => clearTimeout(timer);
   }, [isPlaying, settings, graph]);
