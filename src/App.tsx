@@ -164,10 +164,12 @@ export default function App() {
   const [isPlaying, setPlaying] = useState(false);
   const [settings, setSettings] = useState({
     voiceness: 0,
-    speed: 0.1,
+    pace: 0.1,
     range: 25,
     frequency: 140,
   });
+  const [wakeLock, setWakeLock] = useState<WakeLockSentinel | null>(null);
+
   useEffect(() => {
     if (!graph) return;
     const { master, orbitControl, pinkTrombone, updateTrombone, context } =
@@ -196,12 +198,12 @@ export default function App() {
     });
     const tongueKeys = Object.keys(tongueKeyMap);
 
-    let interval = (0.05 + settings.speed) / 2;
+    let interval = (0.05 + settings.pace) / 2;
     let schTime = context.currentTime;
     let timer = setTimeout(function queueRandomMove() {
       if (Math.random() < 0.5) {
         interval += 0.025 * (2 * Math.random() - 1);
-        interval = Math.min(Math.max(0.05, interval), settings.speed);
+        interval = Math.min(Math.max(0.05, interval), settings.pace);
       }
       schTime += interval + Math.random() * 0.05;
       const startSchTime = schTime;
@@ -218,7 +220,7 @@ export default function App() {
 
         if (Math.random() < 0.5) {
           interval += 0.025 * (2 * Math.random() - 1);
-          interval = Math.min(Math.max(0.05, interval), settings.speed);
+          interval = Math.min(Math.max(0.05, interval), settings.pace);
         }
         const duration = interval + Math.random() * 0.05;
 
@@ -243,7 +245,7 @@ export default function App() {
       }
 
       const ms = (schTime - startSchTime) * 1000;
-      timer = setTimeout(queueRandomMove, ms - 120);
+      timer = setTimeout(queueRandomMove, ms - 240);
     }, 500);
     return () => clearTimeout(timer);
   }, [isPlaying, settings, graph]);
@@ -258,7 +260,14 @@ export default function App() {
           <button
             type="button"
             onClick={async () => {
-              if (!isPlaying && !graph) setGraph(await buildAudioGraph());
+              if (isPlaying && wakeLock) {
+                await wakeLock.release();
+              } else if (!isPlaying && !wakeLock) {
+                setWakeLock(await navigator.wakeLock.request("screen"));
+              }
+              if (!isPlaying && !graph) {
+                setGraph(await buildAudioGraph());
+              }
               setPlaying(!isPlaying);
             }}
           />
@@ -299,19 +308,19 @@ export default function App() {
           }}
         />{" "}
         <div>{settings.frequency}</div>
-        <div className="label">Speed</div>
+        <div className="label">PACE</div>
         <input
           type="range"
           min={0.05}
           max={0.5}
-          value={settings.speed}
+          value={settings.pace}
           step={0.01}
           onChange={(e) => {
             console.log(Number(e.target.value));
-            setSettings({ ...settings, speed: Number(e.target.value) });
+            setSettings({ ...settings, pace: Number(e.target.value) });
           }}
         />
-        <div>{settings.speed}</div>
+        <div>{settings.pace}</div>
         <div className="label">Range</div>
         <input
           type="range"
